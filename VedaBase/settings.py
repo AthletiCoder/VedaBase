@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'common',
     'verses',
 ]
 
@@ -108,4 +109,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-from .local_settings import *
+from .local_settings import DATABASES

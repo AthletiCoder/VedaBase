@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from verses.views import VerseHandler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('verse/', VerseHandler.as_view())
 ]
