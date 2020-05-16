@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from verses.views import VerseHandler
+from verses.views import VerseHandler, TagTranslationHandler, TagPurportSectionHandler
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('verse/', VerseHandler.as_view())
+    path('verse/tagTranslation', TagTranslationHandler.as_view())
+    path('verse/tagPurportSection', TagPurportSectionHandler.as_view())
 ]

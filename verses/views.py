@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
-from verses.schema import VerseSchema, TagSchema
+from verses.schema import VerseSchema, TagSchema, TranslationTagSchema, PurportSectionTagSchema
 from common import api_exceptions
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from verses.models import Verse
+from verses.models import Verse, TranslationTag, PurportSectionTag
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
@@ -71,6 +71,7 @@ class VerseHandler(View):
         resp_data = make_response({}, message="Successfully updated verse", code=PUT_SUCCESS_CODE)
         return JsonResponse(resp_data)
 
+
 class TagHandler(View):
     schema = TagSchema
 
@@ -79,3 +80,37 @@ class TagHandler(View):
         schema = (self.schema)()
         data = schema.dump(tags)
         return JsonResponse(data)
+
+class TagTranslationHandler(View):
+    schema = TranslationTagSchema
+
+    @csrf_exempt
+    def post(self, request):
+        req_data = json.loads(request.body)
+        schema = (self.schema)()
+        new_translation_tag = schema.load(req_data)
+        try:
+            translation_tags = TranslationTag.objects.create(**new_translation_tag)
+        except DjangoValidationError as e:
+            raise api_exceptions.ValidationError(errors=e.message_dict)
+        except IntegrityError as e:
+            raise api_exceptions.ValidationError(errors="DB Integrity error")
+        resp_data = schema.dump(translation_tags)
+        return JsonResponse(resp_data)
+
+class TagPurportSectionHandler(View):
+    schema = PurportSectionTagSchema
+
+    @csrf_exempt
+    def post(self, request):
+        req_data = json.loads(request.body)
+        schema = (self.schema)()
+        new_purport_section_tag = schema.load(req_data)
+        try:
+            purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
+        except DjangoValidationError as e:
+            raise api_exceptions.ValidationError(errors=e.message_dict)
+        except IntegrityError as e:
+            raise api_exceptions.ValidationError(errors="DB Integrity error")
+        resp_data = schema.dump(purport_section_tags)
+        return JsonResponse(resp_data)

@@ -13,7 +13,20 @@ class VerseSchema(Schema):
     translation = fields.Str(required=True)
     purport = fields.Str(required=True)
 
-
 class TagSchema(Schema):
     model = Tag1
     tag1 = fields.Str(required=False)
+
+class TranslationTagSchema(Schema):
+    model = TranslationTag
+
+    verse = fields.Str(required=True)
+    tag = fields.Str(required=True)
+
+class PurportSectionTagSchema(Schema):
+    model = PurportSectionTag
+
+    verse = fields.Str(required=True)
+    start_idx = fields.Integer(required=True)
+    end_idx = fields.Integer(required=True)
+    tag = fields.Str(required=True)
