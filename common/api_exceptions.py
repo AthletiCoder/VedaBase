@@ -1,8 +1,50 @@
+from functools import wraps
+from django.http import JsonResponse
+from django.utils.encoding import force_text
+
+def api_exception_handler(f):
+    @wraps(f)
+    def decorated_function(request, *args, **kwargs):
+        try:
+            return f(request, *args, **kwargs)
+        except APIException as e:
+            # api exceptions are of string typed error
+            if isinstance(e.errors, str):
+                error = e.errors
+
+            # check if error is of dict type
+            elif isinstance(e.errors, dict):
+                error = dict()
+                for k, v in e.errors.items():
+                    # error can be dict of dict
+                    if isinstance(v, dict):
+                        msg = [",".join(m) if isinstance(m, list) else m for m in v.values()]
+                        # this error type handling nested schema, reference: check for register account errors
+                        error.update(
+                            {
+                                str(k).lower(): {
+                                    str(m).lower(): e[0] if isinstance(e, list) else e for m, e in v.items()
+                                }
+                            }
+                        )
+
+                    # if error dict values contains list , errors used every where in schema
+                    else:
+                        msg = [",".join(v) if isinstance(v, list) else v]
+                        error.update({str(k).lower(): v[0] if isinstance(v, list) else v})
+
+            # if something unexpected happened
+            else:
+                error = e.errors
+            return JsonResponse({"message": str(e.detail), "error": error, "status_code": e.code}, status=e.code)
+
+    return decorated_function
+
 class APIException(Exception):
     status_code = 500
     default_detail = "A server error occured"
 
-    def __int__(self, detail=None, errors=None, code=None):
+    def __init__(self, detail=None, errors=None, code=None):
         self.detail = self.default_detail if detail==None else detail
         self.errors = errors
         self.code = self.status_code if code==None else code
