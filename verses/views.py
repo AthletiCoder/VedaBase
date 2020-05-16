@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from verses.models import Verse
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.utils import IntegrityError
 # Create your views here.
 
 class VerseHandler(View):
@@ -41,11 +42,12 @@ class VerseHandler(View):
         req_data["chapter_num"] = int(verse_details[1])
         req_data["verse_num"] = int(verse_details[2])
         new_verses_data = schema.load(req_data)
-        print(new_verses_data)
         try:
             new_verses = Verse.objects.create(**new_verses_data)
         except DjangoValidationError as e:
             raise api_exceptions.ValidationError(errors=e.message_dict)
+        except IntegrityError as e:
+            raise api_exceptions.ValidationError(errors="DB Integrity error")
         resp_data = schema.dump(new_verses)
         return JsonResponse(resp_data)
 
@@ -63,7 +65,7 @@ class VerseHandler(View):
             raise api_exceptions.ValidationError(errors="Verse doesn't exist")
         try:
             verse_obj.update(**verse_updates)
-        except DjangoValidationError as e:
+        except (DjangoValidationError, IntegrityError) as e:
             raise api_exceptions.ValidationError(errors=e.message_dict)
 
         resp_data = make_response({}, message="Successfully updated verse", code=PUT_SUCCESS_CODE)
