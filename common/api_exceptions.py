@@ -18,7 +18,6 @@ def api_exception_handler(f):
                 for k, v in e.errors.items():
                     # error can be dict of dict
                     if isinstance(v, dict):
-                        msg = [",".join(m) if isinstance(m, list) else m for m in v.values()]
                         # this error type handling nested schema, reference: check for register account errors
                         error.update(
                             {
@@ -30,7 +29,6 @@ def api_exception_handler(f):
 
                     # if error dict values contains list , errors used every where in schema
                     else:
-                        msg = [",".join(v) if isinstance(v, list) else v]
                         error.update({str(k).lower(): v[0] if isinstance(v, list) else v})
 
             # if something unexpected happened

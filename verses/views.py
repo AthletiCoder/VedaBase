@@ -21,7 +21,12 @@ class VerseHandler(View):
         return super(VerseHandler, self).dispatch(*args, **kwargs)
 
     def get(self, request):
-        verses = Verse.objects.all()
+        filter_params = {}
+        filters = ["verse_id", "canto_num", "chapter_num", "verse_num"]
+        for key in filters:
+            if request.GET.get(key):
+                filter_params[key] = request.GET.get(key)
+        verses = Verse.objects.filter(**filter_params)
         schema = (self.schema)()
         data = schema.dump(verses, many=True)
         resp_data = make_response(data, message="Successfully fetched verses", code=GET_SUCCESS_CODE)
