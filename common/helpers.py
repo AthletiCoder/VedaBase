@@ -15,3 +15,15 @@ def make_response(data, message, code):
         data["message"] = message
         data["status_code"] = code
         return data
+
+def get_filters(request, filter_params):
+    filters = {}
+    if isinstance(filter_params,list):
+        for key in filter_params:
+            if request.GET.get(key):
+                filters[key] = request.GET.get(key)
+    if isinstance(filter_params, dict):
+        for key, val in filter_params.items():
+            if request.GET.get(val):
+                filters[key] = request.GET.get(val)
+    return filters

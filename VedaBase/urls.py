@@ -19,7 +19,7 @@ from verses.views import VerseHandler, TagTranslationHandler, TagPurportSectionH
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('verse/', VerseHandler.as_view())
-    path('verse/tagTranslation', TagTranslationHandler.as_view())
-    path('verse/tagPurportSection', TagPurportSectionHandler.as_view())
+    path('verse/', VerseHandler.as_view()),
+    path('verse/tagTranslation', TagTranslationHandler.as_view()),
+    path('verse/tagPurportSection', TagPurportSectionHandler.as_view()),
 ]

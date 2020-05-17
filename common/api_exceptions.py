@@ -1,6 +1,7 @@
 from functools import wraps
 from django.http import JsonResponse
 from django.utils.encoding import force_text
+from marshmallow import ValidationError as MVError
 
 def api_exception_handler(f):
     @wraps(f)

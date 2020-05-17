@@ -23,6 +23,9 @@ class Tag3(models.Model):
     name = models.CharField(max_length=70, unique=True)
     parent_tag = models.ForeignKey(Tag2, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return "{}".format(self.name)
+
 class TranslationTag(models.Model):
     verse = models.ForeignKey(Verse, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag3, on_delete=models.SET_DEFAULT, default="None")
