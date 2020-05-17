@@ -163,10 +163,11 @@ class TagPurportSectionHandler(View):
         req_data = json.loads(request.body)
         schema = (self.schema)()
         try:
-            new_purport_section_tag = schema.load()
+            new_purport_section_tag = schema.load(req_data)
         except MarshmallowValidationError as e:
             raise api_exceptions.BadRequestData(errors=e.messages)
         try:
+            new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
             purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
         except DjangoValidationError as e:
             raise api_exceptions.ValidationError(errors=e.message_dict)

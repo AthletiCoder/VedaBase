@@ -15,7 +15,7 @@ class VerseSchema(Schema):
 
     @validates("verse_id")
     def validate_verse_id(self, value):
-        verse_obj = self.model.filter(verse_id=value)
+        verse_obj = self.model.objects.filter(verse_id=value)
         if verse_obj:
             raise ValidationError("This verse already exists in the DB")
 
@@ -24,7 +24,10 @@ class TagSchema(Schema):
     tag1 = fields.Str(required=False)
 
     
-class TaggingSchema(Schema):
+class BaseTaggingSchema(Schema):
+    verse_id = fields.Str(required=True)
+    tag = fields.Str(required=True)
+
     @validates("verse_id")
     def validate_verse_id(self, value):
         verse_obj = Verse.objects.filter(verse_id=value)
@@ -37,24 +40,20 @@ class TaggingSchema(Schema):
         if not tag_obj:
             raise ValidationError("Invalid tag")
 
-class TranslationTagSchema(TaggingSchema):
+class TranslationTagSchema(BaseTaggingSchema):
     model = TranslationTag
 
-    verse_id = fields.Str(required=True)
-    tag = fields.Str(required=True)
-
-class PurportSectionTagSchema(TaggingSchema):
+class PurportSectionTagSchema(BaseTaggingSchema):
     model = PurportSectionTag
 
-    verse_id = fields.Str(required=True)
     start_idx = fields.Integer(required=True)
     end_idx = fields.Integer(required=True)
-    tag = fields.Str(required=True)
 
     @validates_schema
-    def validate_indices(self, data):
+    def validate_indices(self, data, **kwargs):
         start = int(data.get("start_idx"))
         end = int(data.get("end_idx"))
-        purport_size = len(Verse.objects.get(verse_id="verse_id").purport)
+        verse_id = data.get("verse_id")
+        purport_size = len(Verse.objects.get(verse_id=verse_id).purport)
         if start>=end or end>purport_size-1 or start<0:
             raise ValidationError("Invalid start and end indices")

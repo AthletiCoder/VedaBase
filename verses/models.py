@@ -30,8 +30,17 @@ class TranslationTag(models.Model):
     verse = models.ForeignKey(Verse, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag3, on_delete=models.SET_DEFAULT, default="None")
 
+    class Meta:
+        unique_together = ('verse_id', 'tag')
+
 class PurportSectionTag(models.Model):
     verse = models.ForeignKey(Verse, on_delete=models.CASCADE)
     start_idx = models.IntegerField(null=False)
     end_idx = models.IntegerField(null=False)
     tag = models.ForeignKey(Tag3,on_delete=models.SET_DEFAULT, default="None")
+
+    class Meta:
+        unique_together = ('verse_id', 'tag', 'start_idx', 'end_idx')
+
+
+
