@@ -43,7 +43,12 @@ class VerseHandler(View):
         verse_details = req_data["verse_id"].split(".")
         req_data["canto_num"] = int(verse_details[0])
         req_data["chapter_num"] = int(verse_details[1])
-        req_data["verse_num"] = int(verse_details[2])
+        if '-' in verse_details[2]:
+            start, end = verse_details[2].split("-")
+            req_data["verse_num"] = int(start)
+            req_data["verse_num_end"] = int(end)
+        else:
+            req_data["verse_num"] = int(verse_details[2])
         try:
             new_verses_data = schema.load(req_data)
         except MarshmallowValidationError as e:

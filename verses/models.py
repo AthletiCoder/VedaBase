@@ -8,7 +8,10 @@ class Verse(models.Model):
     canto_num = models.IntegerField(null=False)
     chapter_num = models.IntegerField(null=False)
     verse_num = models.IntegerField(null=False)
-    verse = custom_models.Text(max_length=200, null=False)
+    verse_num_end = models.IntegerField(null=True)
+    verse = custom_models.Text(max_length=1000, null=False)
+    synonyms = custom_models.Text(max_length=5000, null=False)
+    devanagari = custom_models.Text(max_length=1000, null=False)
     translation = custom_models.Text(max_length=1000, null=False)
     purport = custom_models.Text(max_length=40000, null=True)
 
