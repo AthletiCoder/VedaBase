@@ -50,6 +50,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+MIDDLEWARE_CLASSES = [
+    'VedaBase.CorsMiddleware'
+]
+
 ROOT_URLCONF = 'VedaBase.urls'
 
 TEMPLATES = [

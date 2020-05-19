@@ -16,7 +16,6 @@ class VerseSchema(Schema):
 class TagSchema(Schema):
     model = Tag1
     tag1 = fields.Str(required=False)
-
     
 class BaseTaggingSchema(Schema):
     verse_id = fields.Str(required=True)
