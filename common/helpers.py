@@ -8,12 +8,14 @@ def make_response(data, message, code):
         resp_data = {
             "message":message,
             "status_code":code,
-            "payload":data
+            "payload":data,
+            "Access-Control-Allow-Origin": "*"
         }
         return resp_data
     elif isinstance(data, dict):
         data["message"] = message
         data["status_code"] = code
+        data["Access-Control-Allow-Origin"] = '*'
         return data
 
 def get_filters(request, filter_params):

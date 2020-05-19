@@ -13,12 +13,6 @@ class VerseSchema(Schema):
     translation = fields.Str(required=True)
     purport = fields.Str(required=True)
 
-    @validates("verse_id")
-    def validate_verse_id(self, value):
-        verse_obj = self.model.objects.filter(verse_id=value)
-        if verse_obj:
-            raise ValidationError("This verse already exists in the DB")
-
 class TagSchema(Schema):
     model = Tag1
     tag1 = fields.Str(required=False)

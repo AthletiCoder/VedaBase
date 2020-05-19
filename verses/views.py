@@ -37,6 +37,7 @@ class VerseHandler(View):
 
     @csrf_exempt
     def post(self, request):
+        # TODO :- Need to handle validation of verse_id in POST and PUT updates
         req_data = json.loads(request.body)
         schema = (self.schema)()
         verse_details = req_data["verse_id"].split(".")
