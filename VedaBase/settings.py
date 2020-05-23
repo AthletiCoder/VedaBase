@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'common',
     'verses',
     'corsheaders',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,11 @@ TEMPLATES = [
         },
     },
 ]
+
+JWT_SECRET = "KrishaIsSupreme"
+JWT_WEB_EXP_DELTA_HOURS = 30
+
+AUTH_USER_MODEL = 'accounts.Account'
 
 WSGI_APPLICATION = 'VedaBase.wsgi.application'
 
