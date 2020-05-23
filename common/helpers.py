@@ -87,20 +87,19 @@ def api_token_required(f):
     def decorated_function(request, *args, **kwargs):
         request.user = None
         # get jwt token
-        jwt_token = request.META.get("HTTP_JCMS_API_TOKEN", None)
+        jwt_token = request.META.get("HTTP_VB_API_TOKEN", None)
         if jwt_token:
             try:
                 # read public key
-                public_key = open(settings.JWT_PUBLIC_KEY).read()
+                public_key = settings.JWT_SECRET
                 # decode jwt token
-                payload = jwt.decode(jwt_token, public_key, algorithms=settings.JWT_ALGORITHM, verify_exp=True)
+                payload = jwt.decode(jwt_token, public_key)
             except (jwt.DecodeError, jwt.ExpiredSignatureError):
-                request.log.error("Token is invalid/expired.")
                 return JsonResponse({"error": INVALID_TOKEN, "message": AUTH_ERROR, "status_code": 452}, status=401)
 
             # set user in request
             user_model = get_user_model()
-            user = user_model.objects.filter(id=payload["user_id"]).select_related("account", "account__account_type")
+            user = user_model.objects.filter(id=payload["user_id"])
             if not user:
                 request.log.error("User doesn't exist in system")
                 return JsonResponse(
@@ -108,14 +107,10 @@ def api_token_required(f):
                 )
             request.user = user[0]
             request.token = jwt_token
-            request.platform = payload["platform"]
             # check if user session exists in system
             try:
-                request.session = (
-                    request.user.user_session_m if request.platform == "mobile" else request.user.user_session_w
-                )
+                request.session = request.user.user_session
             except dj_core_exceptions.ObjectDoesNotExist:
-                request.log.error("User doesn't exist in system")
                 return JsonResponse(
                     {"error": USER_NOT_EXIST_IN_ACCOUNT, "message": AUTH_ERROR, "status_code": 453}, status=401
                 )

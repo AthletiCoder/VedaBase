@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from accounts.schema import LoginSchema
+from accounts.models import UserSession
 
 from common import api_exceptions
 from common.helpers import (
@@ -14,17 +15,17 @@ from common.helpers import (
     generate_random_alphenumeric_number,
     validate_json_request,
 )
-from common.helpers import make_response
+from common.helpers import make_response, set_request_session
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from marshmallow import ValidationError
 
 User = get_user_model()
 
-@method_decorator(csrf_exempt)
 @require_http_methods(["POST"])
 @api_exceptions.api_exception_handler
 @validate_json_request
+@method_decorator(csrf_exempt)
 def login(request):
     """
     This API is used to login a user in system. Access Token is return per user session.
@@ -46,20 +47,21 @@ def login(request):
     # generate user session id
     session_id = generate_random_alphenumeric_number(32)
     # get session data
-    session = request.session_table
-    exp_time = request.session_exp_time
+
+    session = UserSession
+    exp_time = settings.JWT_WEB_EXP_DELTA_HOURS
     # if session exists, delete this session and create new one
     session.objects.filter(user=user).delete()
 
     # create new session for user
     try:
         session.objects.create(user=user, session_id=session_id)
-    # Handling scenario for multiple user creation at same time
+    # # Handling scenario for multiple user creation at same time
     except IntegrityError:
         raise api_exceptions.BadRequestData(errors="Session already exists")
 
     # read private secret key
-    private_key = open(settings.JWT_PRIVATE_KEY).read()
+    private_key = settings.JWT_SECRET
 
     # set payload with user id and expiry time
     payload = {
@@ -69,16 +71,15 @@ def login(request):
     }
 
     # encode token with private key
-    token = jwt.encode(payload, private_key, algorithm=settings.JWT_ALGORITHM).decode("utf-8")
+    token = jwt.encode(payload, private_key).decode("utf-8")
     response["token"] = token
     response["user_id"] = str(user.id)
-    response["language"] = user.language
-    response["account_number"] = user.account.account_number
-    response["account_type"] = user.account.account_type.name
+    response["account_type"] = user.user_type
     request.user = user
-    return JsonResponse(make_response(request, "Successfully logged in", response), status=201)
+    print(response)
+    return JsonResponse(make_response(response, "Successfully logged in", code=201), status=201)
 
-
+@method_decorator(csrf_exempt)
 @require_http_methods(["POST"])
 @api_exceptions.api_exception_handler
 @api_token_required
@@ -88,4 +89,4 @@ def logout(request):
     """
     request.session.delete()
     code = 201
-    return JsonResponse(make_response(request, "Successfully logged out", code=code), status=code)
+    return JsonResponse(make_response({}, "Successfully logged out", code=code), status=code)
