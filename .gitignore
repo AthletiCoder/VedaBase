@@ -1,2 +1,7 @@
 local_settings.py
+<<<<<<< HEAD
+__pycache__/*
+*.pyc
+=======
 .pyc
+>>>>>>> abf38b9e362c4c87e291e2bafaae05a8db8c3526
