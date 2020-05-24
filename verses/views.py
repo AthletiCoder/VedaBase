@@ -119,7 +119,7 @@ class TagTranslationHandler(View):
         print(tag_objects)
         schema = (self.schema)()
         data = schema.dump(tag_objects, many=True)
-        resp_data = make_response(data, message="Successfully fetched verses", code=GET_SUCCESS_CODE)
+        resp_data = make_response(data, message="Successfully fetched translation tags", code=GET_SUCCESS_CODE)
         return JsonResponse(resp_data)
 
     @csrf_exempt
@@ -156,12 +156,12 @@ class TagPurportSectionHandler(View):
         verse_filters = get_filters(request, verse_filter_params)
         tag_filters = get_filters(request, tag_filter_params)
 
-        tag_objects = TagPurportSectionHandler.objects.filter(**tag_filters).select_related("verse")
+        tag_objects = PurportSectionTag.objects.filter(**tag_filters).select_related("verse")
         tag_objects = tag_objects.filter(**verse_filters)
         print(tag_objects)
         schema = (self.schema)()
         data = schema.dump(tag_objects, many=True)
-        resp_data = make_response(data, message="Successfully fetched translation tags", code=GET_SUCCESS_CODE)
+        resp_data = make_response(data, message="Successfully fetched purport tags", code=GET_SUCCESS_CODE)
         return JsonResponse(resp_data)
 
     @csrf_exempt
