@@ -125,21 +125,23 @@ class TagTranslationHandler(View):
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
-        try:
-            new_translation_tag = schema.load(req_data)
-        except MarshmallowValidationError as e:
-            raise api_exceptions.BadRequestData(errors=e.messages)
-        new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
-        new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
-        try:
-            translation_tags = TranslationTag.objects.create(**new_translation_tag)
-        except DjangoValidationError as e:
-            raise api_exceptions.ValidationError(errors=e.message_dict)
-        except IntegrityError as e:
-            raise api_exceptions.ValidationError(errors="DB Integrity error")
-        resp_data = schema.dump(translation_tags)
-        resp_data = make_response(resp_data, message="Successfully added translation tag", code=PUT_SUCCESS_CODE)
-        return JsonResponse(resp_data)
+        resp_data = []
+        for req in req_data:
+            try:
+                new_translation_tag = schema.load(req)
+            except MarshmallowValidationError as e:
+                raise api_exceptions.BadRequestData(errors=e.messages)
+            new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
+            new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
+            try:
+                translation_tags = TranslationTag.objects.create(**new_translation_tag)
+            except DjangoValidationError as e:
+                raise api_exceptions.ValidationError(errors=e.message_dict)
+            except IntegrityError as e:
+                raise api_exceptions.ValidationError(errors="DB Integrity error")
+            resp_data.append(schema.dump(translation_tags))
+        return JsonResponse(make_response(resp_data, "Successfully added translation tags", POST_SUCCESS_CODE))
+
 
 class TagPurportSectionHandler(View):
     schema = PurportSectionTagSchema
@@ -166,16 +168,18 @@ class TagPurportSectionHandler(View):
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
-        try:
-            new_purport_section_tag = schema.load(req_data)
-        except MarshmallowValidationError as e:
-            raise api_exceptions.BadRequestData(errors=e.messages)
-        try:
-            new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
-            purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
-        except DjangoValidationError as e:
-            raise api_exceptions.ValidationError(errors=e.message_dict)
-        except IntegrityError as e:
-            raise api_exceptions.ValidationError(errors="DB Integrity error")
-        resp_data = schema.dump(purport_section_tags)
-        return JsonResponse(resp_data)
+        resp_data = []
+        for req in req_data:
+            try:
+                new_purport_section_tag = schema.load(req)
+            except MarshmallowValidationError as e:
+                raise api_exceptions.BadRequestData(errors=e.messages)
+            try:
+                new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
+                purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
+            except DjangoValidationError as e:
+                raise api_exceptions.ValidationError(errors=e.message_dict)
+            except IntegrityError as e:
+                raise api_exceptions.ValidationError(errors="DB Integrity error")
+            resp_data.append(schema.dump(purport_section_tags))
+        return JsonResponse(make_response(resp_data, "Successfully added purport tags", POST_SUCCESS_CODE))
