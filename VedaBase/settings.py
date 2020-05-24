@@ -24,7 +24,7 @@ SECRET_KEY = 'lmf=^*pi*0dq7-*dc#j65*sjd-$mi*0=61s%dq!%kv=arsq9j3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
