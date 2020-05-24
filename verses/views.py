@@ -126,8 +126,10 @@ class TagTranslationHandler(View):
         req_data = json.loads(request.body)
         schema = (self.schema)()
         resp_data = []
-        for req in req_data:
+        verse_id = req_data["verse_id"]
+        for req in req_data["translationtags"]:
             try:
+                req['verse_id'] = verse_id
                 new_translation_tag = schema.load(req)
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
@@ -169,8 +171,10 @@ class TagPurportSectionHandler(View):
         req_data = json.loads(request.body)
         schema = (self.schema)()
         resp_data = []
-        for req in req_data:
+        verse_id = req_data['verse_id']
+        for req in req_data['purporttags']:
             try:
+                req['verse_id'] = verse_id
                 new_purport_section_tag = schema.load(req)
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
