@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 from verses.schema import VerseSchema, TagSchema, TranslationTagSchema, PurportSectionTagSchema
 from common import api_exceptions
-from common.helpers import get_filters
+from common.helpers import get_filters, api_token_required
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
@@ -18,7 +18,8 @@ from marshmallow import ValidationError as MarshmallowValidationError
 class VerseHandler(View):
     schema = VerseSchema
 
-    @api_exceptions.api_exception_handler
+    @method_decorator(api_exceptions.api_exception_handler)
+    @method_decorator(api_token_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(VerseHandler, self).dispatch(*args, **kwargs)
@@ -90,6 +91,7 @@ class TagHandler(View):
     schema = TagSchema
 
     @api_exceptions.api_exception_handler
+    @method_decorator(api_token_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(VerseHandler, self).dispatch(*args, **kwargs)
@@ -104,6 +106,7 @@ class TagTranslationHandler(View):
     schema = TranslationTagSchema
 
     @api_exceptions.api_exception_handler
+    @method_decorator(api_token_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(TagTranslationHandler, self).dispatch(*args, **kwargs)
@@ -116,7 +119,6 @@ class TagTranslationHandler(View):
 
         tag_objects = TranslationTag.objects.filter(**tag_filters).select_related("verse")
         tag_objects = tag_objects.filter(**verse_filters)
-        print(tag_objects)
         schema = (self.schema)()
         data = schema.dump(tag_objects, many=True)
         resp_data = make_response(data, message="Successfully fetched translation tags", code=GET_SUCCESS_CODE)
@@ -126,26 +128,31 @@ class TagTranslationHandler(View):
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
-        try:
-            new_translation_tag = schema.load(req_data)
-        except MarshmallowValidationError as e:
-            raise api_exceptions.BadRequestData(errors=e.messages)
-        new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
-        new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
-        try:
-            translation_tags = TranslationTag.objects.create(**new_translation_tag)
-        except DjangoValidationError as e:
-            raise api_exceptions.ValidationError(errors=e.message_dict)
-        except IntegrityError as e:
-            raise api_exceptions.ValidationError(errors="DB Integrity error")
-        resp_data = schema.dump(translation_tags)
-        resp_data = make_response(resp_data, message="Successfully added translation tag", code=PUT_SUCCESS_CODE)
-        return JsonResponse(resp_data)
+        resp_data = []
+        verse_id = req_data["verse_id"]
+        for req in req_data["translationtags"]:
+            try:
+                req['verse_id'] = verse_id
+                new_translation_tag = schema.load(req)
+            except MarshmallowValidationError as e:
+                raise api_exceptions.BadRequestData(errors=e.messages)
+            new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
+            new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
+            try:
+                translation_tags = TranslationTag.objects.create(**new_translation_tag)
+            except DjangoValidationError as e:
+                raise api_exceptions.ValidationError(errors=e.message_dict)
+            except IntegrityError as e:
+                raise api_exceptions.ValidationError(errors="DB Integrity error")
+            resp_data.append(schema.dump(translation_tags))
+        return JsonResponse(make_response(resp_data, "Successfully added translation tags", POST_SUCCESS_CODE))
+
 
 class TagPurportSectionHandler(View):
     schema = PurportSectionTagSchema
 
     @api_exceptions.api_exception_handler
+    @method_decorator(api_token_required)
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(TagPurportSectionHandler, self).dispatch(*args, **kwargs)
@@ -158,7 +165,6 @@ class TagPurportSectionHandler(View):
 
         tag_objects = PurportSectionTag.objects.filter(**tag_filters).select_related("verse")
         tag_objects = tag_objects.filter(**verse_filters)
-        print(tag_objects)
         schema = (self.schema)()
         data = schema.dump(tag_objects, many=True)
         resp_data = make_response(data, message="Successfully fetched purport tags", code=GET_SUCCESS_CODE)
@@ -168,16 +174,20 @@ class TagPurportSectionHandler(View):
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
-        try:
-            new_purport_section_tag = schema.load(req_data)
-        except MarshmallowValidationError as e:
-            raise api_exceptions.BadRequestData(errors=e.messages)
-        try:
-            new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
-            purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
-        except DjangoValidationError as e:
-            raise api_exceptions.ValidationError(errors=e.message_dict)
-        except IntegrityError as e:
-            raise api_exceptions.ValidationError(errors="DB Integrity error")
-        resp_data = schema.dump(purport_section_tags)
-        return JsonResponse(resp_data)
+        resp_data = []
+        verse_id = req_data['verse_id']
+        for req in req_data['purporttags']:
+            try:
+                req['verse_id'] = verse_id
+                new_purport_section_tag = schema.load(req)
+            except MarshmallowValidationError as e:
+                raise api_exceptions.BadRequestData(errors=e.messages)
+            try:
+                new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
+                purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
+            except DjangoValidationError as e:
+                raise api_exceptions.ValidationError(errors=e.message_dict)
+            except IntegrityError as e:
+                raise api_exceptions.ValidationError(errors="DB Integrity error")
+            resp_data.append(schema.dump(purport_section_tags))
+        return JsonResponse(make_response(resp_data, "Successfully added purport tags", POST_SUCCESS_CODE))
