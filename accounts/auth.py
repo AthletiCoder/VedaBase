@@ -6,8 +6,10 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from accounts.schema import LoginSchema
-from accounts.models import UserSession
+from accounts.schema import LoginSchema, RegisterSchema
+from accounts.models import UserSession, Account
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.utils import IntegrityError
 
 from common import api_exceptions
 from common.helpers import (
@@ -90,3 +92,28 @@ def logout(request):
     request.session.delete()
     code = 201
     return JsonResponse(make_response({}, "Successfully logged out", code=code), status=code)
+
+@require_http_methods(["POST"])
+@api_exceptions.api_exception_handler
+@validate_json_request
+@method_decorator(csrf_exempt)
+def register(request):
+    """
+    This API is used to register the user to system.
+    """
+    schema = RegisterSchema()
+    # validate request data
+    try:
+        data = schema.loads(request.body)
+    except ValidationError as e:
+        raise api_exceptions.BadRequestData(errors=e.messages)
+    user_type_dict = {"user":1, "tagger":2, "reviewer":3}
+    data["user_type"] = user_type_dict[data["user_type"]]
+    try:
+        password = data.pop("password")
+        user = Account.objects.create(**data)
+        user.set_password(password)
+        user.save()
+    except (IntegrityError, DjangoValidationError) as e:
+        raise api_exceptions.BadRequestData(errors=e.messages)
+    return JsonResponse(make_response({}, "Successfully registered user", code=201), status=201)
