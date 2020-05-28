@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from verses.views import VerseHandler, TagTranslationHandler, TagPurportSectionHandler
+from verses.api.verse import VerseHandler
+from verses.api.tag import TagTranslationHandler, TagPurportSectionHandler
 from accounts.auth import login, logout, register
 
 urlpatterns = [
