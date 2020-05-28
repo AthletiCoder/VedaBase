@@ -25,14 +25,23 @@ class VerseHandler(View):
 
     def get(self, request):
         filter_params = {}
-        filters = ["verse_id", "canto_num", "chapter_num", "verse_num"]
+        filters = ["verse_id", "canto_num", "chapter_num"]
         for key in filters:
             if request.GET.get(key):
                 filter_params[key] = request.GET.get(key)
         verses = Verse.objects.filter(**filter_params)
+        if not verses and '-' not in request.GET.get("verse_id"):
+            ca, ch, ve = map(int, (request.GET.get("verse_id")).split("."))
+            query = "SELECT * FROM verses_verse where canto_num={} and chapter_num={} and verse_num<={} and {}<=verse_num_end".format(ca, ch, ve, ve)
+            print(query)
+            verses = Verse.objects.raw(query)
         schema = (self.schema)()
-        data = schema.dump(verses, many=True)
-        resp_data = make_response(data, message="Successfully fetched verses", code=GET_SUCCESS_CODE)
+        resp_data = None
+        if verses:
+            data = schema.dump(verses, many=True)
+            resp_data = make_response(data, message="Successfully fetched verses", code=GET_SUCCESS_CODE)
+        else:
+            raise api_exceptions.BadRequestData(errors="Doesn't match with any existing verses")
         return JsonResponse(resp_data)
 
     @csrf_exempt
