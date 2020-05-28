@@ -51,6 +51,7 @@ class Command(BaseCommand):
                 request_body["verse_num_end"] = int(verse_details[1])
             else:
                 request_body["verse_num"] = int(verse)
+                request_body["verse_num_end"] = int(verse)
             return request_body, soup
 
         # Main command block

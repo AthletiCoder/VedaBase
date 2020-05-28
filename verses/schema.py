@@ -8,8 +8,6 @@ class VerseSchema(Schema):
     verse_id = fields.Str(required=True)
     canto_num = fields.Integer(required=False)
     chapter_num = fields.Integer(required=False)
-    verse_num = fields.Integer(required=False)
-    verse_num_end = fields.Integer(required=False)
     devanagari = fields.Str(required=True)
     synonyms = fields.Str(required=True)
     verse = fields.Str(required=True)
