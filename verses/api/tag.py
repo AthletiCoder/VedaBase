@@ -9,7 +9,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3
-from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE
+from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE, DELETE_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
@@ -51,7 +51,6 @@ class TagTranslationHandler(View):
         resp_data = make_response(data, message="Successfully fetched translation tags", code=GET_SUCCESS_CODE)
         return JsonResponse(resp_data)
 
-    @csrf_exempt
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
@@ -75,6 +74,22 @@ class TagTranslationHandler(View):
             resp_data.append(schema.dump(translation_tags))
         return JsonResponse(make_response(resp_data, "Successfully added translation tags", POST_SUCCESS_CODE))
 
+    def delete(self, request, id, format=None):
+        tag = self.schema.model.objects.filter(id=id)
+        if not tag:
+            raise api_exceptions.ValidationError(errors="Not a valid tag_id")
+        tag[0].delete()
+        return JsonResponse(make_response({}, "Successfully deleted translation tag", DELETE_SUCCESS_CODE))
+
+    def put(self, request, id, format=None):
+        tag = self.schema.model.objects.filter(id=id)
+        if request.user.user_type!=3:
+            raise api_exceptions.PermissionDenied(errors="Only reviewers are allowed to update")
+        if not tag:
+            raise api_exceptions.ValidationError(errors="Not a valid tag_id")
+        tag[0].reviewer = request.user
+        tag[0].save()
+        return JsonResponse(make_response({}, "Successfully reviewed translation tag", PUT_SUCCESS_CODE))
 
 class TagPurportSectionHandler(View):
     schema = PurportSectionTagSchema
@@ -98,7 +113,6 @@ class TagPurportSectionHandler(View):
         resp_data = make_response(data, message="Successfully fetched purport tags", code=GET_SUCCESS_CODE)
         return JsonResponse(resp_data)
 
-    @csrf_exempt
     def post(self, request):
         req_data = json.loads(request.body)
         schema = (self.schema)()
@@ -120,3 +134,20 @@ class TagPurportSectionHandler(View):
                 raise api_exceptions.ValidationError(errors="DB Integrity error")
             resp_data.append(schema.dump(purport_section_tags))
         return JsonResponse(make_response(resp_data, "Successfully added purport tags", POST_SUCCESS_CODE))
+
+    def delete(self, request, id, format=None):
+        tag = self.schema.model.objects.filter(id=id)
+        if not tag:
+            raise api_exceptions.ValidationError(errors="Not a valid tag_id")
+        tag[0].delete()
+        return JsonResponse(make_response({}, "Successfully deleted translation tag", DELETE_SUCCESS_CODE))
+
+    def put(self, request, id, format=None):
+        tag = self.schema.model.objects.filter(id=id)
+        if request.user.user_type!=3:
+            raise api_exceptions.PermissionDenied(errors="Only reviewers are allowed to update")
+        if not tag:
+            raise api_exceptions.ValidationError(errors="Not a valid tag_id")
+        tag[0].reviewer = request.user
+        tag[0].save()
+        return JsonResponse(make_response({}, "Successfully reviewed purport tag", PUT_SUCCESS_CODE))

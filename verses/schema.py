@@ -19,6 +19,7 @@ class TagSchema(Schema):
     tag1 = fields.Str(required=False)
     
 class BaseTaggingSchema(Schema):
+    tag_id = fields.Function(lambda obj: obj.id)
     verse_id = fields.Str(required=True)
     tag = fields.Str(required=True)
     tagger = fields.Function(lambda obj: obj.tagger.username if obj.tagger!=None else None, dump_only=True, dump_to="tagger")
