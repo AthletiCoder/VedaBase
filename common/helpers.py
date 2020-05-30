@@ -16,6 +16,7 @@ from django.http import JsonResponse
 GET_SUCCESS_CODE = 200
 POST_SUCCESS_CODE = 201
 PUT_SUCCESS_CODE = 202
+DELETE_SUCCESS_CODE = 204
 
 INVALID_TOKEN = "Invalid Token"
 TOKEN_NOT_PROVIDED = "Token not provided"
