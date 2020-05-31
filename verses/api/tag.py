@@ -107,7 +107,7 @@ class TagPurportSectionHandler(View):
         tag_filters = get_filters(request, tag_filter_params)
 
         tag_objects = PurportSectionTag.objects.filter(**tag_filters).select_related("verse")
-        tag_objects = tag_objects.filter(**verse_filters)
+        tag_objects = tag_objects.filter(**verse_filters).order_by("start_idx")
         schema = (self.schema)()
         data = schema.dump(tag_objects, many=True)
         resp_data = make_response(data, message="Successfully fetched purport tags", code=GET_SUCCESS_CODE)
