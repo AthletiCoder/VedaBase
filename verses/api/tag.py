@@ -140,7 +140,7 @@ class TagPurportSectionHandler(View):
         if not tag:
             raise api_exceptions.ValidationError(errors="Not a valid tag_id")
         tag[0].delete()
-        return JsonResponse(make_response({}, "Successfully deleted translation tag", DELETE_SUCCESS_CODE))
+        return JsonResponse(make_response({}, "Successfully deleted purport tag", DELETE_SUCCESS_CODE))
 
     def put(self, request, id, format=None):
         tag = self.schema.model.objects.filter(id=id)
