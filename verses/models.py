@@ -36,6 +36,7 @@ class TranslationTag(models.Model):
     verse = models.ForeignKey(Verse, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag3, on_delete=models.SET_DEFAULT, default="None")
     tagger = models.ForeignKey(User, related_name="translation_tagger", on_delete=models.SET_NULL, null=True)
+    tagger_remark = models.CharField(max_length=1000, null=True)
     reviewer = models.ForeignKey(User, related_name="translation_reviewer", on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -47,6 +48,7 @@ class PurportSectionTag(models.Model):
     end_idx = models.IntegerField(null=False)
     tag = models.ForeignKey(Tag3,on_delete=models.SET_DEFAULT, default="None")
     tagger = models.ForeignKey(User, related_name="purport_tagger", on_delete=models.SET_NULL, null=True)
+    tagger_remark = models.CharField(max_length=1000, null=True)
     reviewer = models.ForeignKey(User, related_name="purport_reviewer", on_delete=models.SET_NULL, null=True)
 
     class Meta:
