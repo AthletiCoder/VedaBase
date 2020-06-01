@@ -71,7 +71,7 @@ class TagTranslationHandler(View):
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
-                if new_translation_tag["tagger_remark"]:
+                if new_translation_tag.get("tagger_remark"):
                     t_tag = self.schema.model.objects.filter(verse_id=new_translation_tag["verse_id"], tag=new_translation_tag["tag"])
                     t_tag.update(tagger_remark=new_translation_tag["tagger_remark"])
                     t_tag[0].save()
@@ -139,7 +139,7 @@ class TagPurportSectionHandler(View):
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
-                if new_purport_section_tag["tagger_remark"]:
+                if new_purport_section_tag.get("tagger_remark"):
                     p_tag = self.schema.model.objects.filter(verse_id=new_purport_section_tag["verse_id"], start_idx=new_purport_section_tag["start_idx"], end_idx=new_purport_section_tag["end_idx"], tag=new_purport_section_tag["tag"])
                     p_tag.update(tagger_remark=new_purport_section_tag["tagger_remark"])
                     p_tag[0].save()
