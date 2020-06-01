@@ -60,17 +60,25 @@ class TagTranslationHandler(View):
             try:
                 req['verse_id'] = verse_id
                 new_translation_tag = schema.load(req)
+                print(new_translation_tag)
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
             new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
             new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
             new_translation_tag["tagger"] = request.user
             try:
-                translation_tags = TranslationTag.objects.create(**new_translation_tag)
+                translation_tags = self.schema.model.objects.create(**new_translation_tag)
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
-                raise api_exceptions.ValidationError(errors="DB Integrity error")
+                if new_translation_tag["tagger_remark"]:
+                    t_tag = self.schema.model.objects.filter(verse_id=new_translation_tag["verse_id"], tag=new_translation_tag["tag"])
+                    t_tag.update(tagger_remark=new_translation_tag["tagger_remark"])
+                    t_tag[0].save()
+                    resp_data.append(schema.dump(t_tag[0]))
+                    continue
+                else:
+                    raise api_exceptions.ValidationError(errors="DB Integrity error")
             resp_data.append(schema.dump(translation_tags))
         return JsonResponse(make_response(resp_data, "Successfully added translation tags", POST_SUCCESS_CODE))
 
@@ -127,11 +135,18 @@ class TagPurportSectionHandler(View):
             try:
                 new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
                 new_purport_section_tag["tagger"] = request.user
-                purport_section_tags = PurportSectionTag.objects.create(**new_purport_section_tag)
+                purport_section_tags = self.schema.model.objects.create(**new_purport_section_tag)
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
-                raise api_exceptions.ValidationError(errors="DB Integrity error")
+                if new_purport_section_tag["tagger_remark"]:
+                    p_tag = self.schema.model.objects.filter(verse_id=new_purport_section_tag["verse_id"], start_idx=new_purport_section_tag["start_idx"], end_idx=new_purport_section_tag["end_idx"], tag=new_purport_section_tag["tag"])
+                    p_tag.update(tagger_remark=new_purport_section_tag["tagger_remark"])
+                    p_tag[0].save()
+                    resp_data.append(schema.dump(p_tag[0]))
+                    continue
+                else:
+                    raise api_exceptions.ValidationError(errors="DB Integrity error")
             resp_data.append(schema.dump(purport_section_tags))
         return JsonResponse(make_response(resp_data, "Successfully added purport tags", POST_SUCCESS_CODE))
 
