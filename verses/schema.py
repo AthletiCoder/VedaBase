@@ -23,6 +23,7 @@ class BaseTaggingSchema(Schema):
     verse_id = fields.Str(required=True)
     tag = fields.Str(required=True)
     tagger = fields.Function(lambda obj: obj.tagger.email if obj.tagger!=None else None, dump_only=True, dump_to="tagger")
+    tagger_remark = fields.Str(required=False)
     reviewer = fields.Function(lambda obj: obj.reviewer.email if obj.reviewer!=None else None, dump_only=True, dump_to="reviewer")
 
     @validates("verse_id")
