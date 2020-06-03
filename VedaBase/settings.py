@@ -24,7 +24,7 @@ SECRET_KEY = 'lmf=^*pi*0dq7-*dc#j65*sjd-$mi*0=61s%dq!%kv=arsq9j3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'common',
     'verses',
     'corsheaders',
+    'accounts',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,8 +52,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
+]
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'VB-API-TOKEN',
 ]
 
 ROOT_URLCONF = 'VedaBase.urls'
@@ -70,6 +78,11 @@ TEMPLATES = [
         },
     },
 ]
+
+JWT_SECRET = "KrishaIsSupreme"
+JWT_WEB_EXP_DELTA_HOURS = 30
+
+AUTH_USER_MODEL = 'accounts.Account'
 
 WSGI_APPLICATION = 'VedaBase.wsgi.application'
 

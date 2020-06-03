@@ -1,5 +1,8 @@
 from django.db import models
 from . import custom_models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # STATIC TABLES
 
@@ -32,6 +35,9 @@ class Tag3(models.Model):
 class TranslationTag(models.Model):
     verse = models.ForeignKey(Verse, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag3, on_delete=models.SET_DEFAULT, default="None")
+    tagger = models.ForeignKey(User, related_name="translation_tagger", on_delete=models.SET_NULL, null=True)
+    tagger_remark = models.CharField(max_length=1000, null=True)
+    reviewer = models.ForeignKey(User, related_name="translation_reviewer", on_delete=models.SET_NULL, null=True)
 
     class Meta:
         unique_together = ('verse_id', 'tag')
@@ -41,9 +47,17 @@ class PurportSectionTag(models.Model):
     start_idx = models.IntegerField(null=False)
     end_idx = models.IntegerField(null=False)
     tag = models.ForeignKey(Tag3,on_delete=models.SET_DEFAULT, default="None")
+    tagger = models.ForeignKey(User, related_name="purport_tagger", on_delete=models.SET_NULL, null=True)
+    tagger_remark = models.CharField(max_length=1000, null=True)
+    reviewer = models.ForeignKey(User, related_name="purport_reviewer", on_delete=models.SET_NULL, null=True)
 
     class Meta:
         unique_together = ('verse_id', 'tag', 'start_idx', 'end_idx')
 
-
-
+class TagRequest(models.Model):
+    verse_id = models.CharField(max_length=15,null=False, unique=True, primary_key=True)
+    name = models.CharField(max_length=70)
+    parent = models.CharField(max_length=60)
+    description = models.CharField(max_length=1000, null=True)
+    initiator = models.ForeignKey(User, related_name="tagrequest_initiator", on_delete=models.SET_NULL, null=True)
+    approver = models.ForeignKey(User, related_name="tagrequest_approver", on_delete=models.SET_NULL, null=True)
