@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
-from verses.schema import TagSchema, TranslationTagSchema, PurportSectionTagSchema
+from verses.schema import TagSchema, TranslationTagSchema, PurportSectionTagSchema, TaggingStatusSchema
 from common import api_exceptions
-from common.helpers import get_filters, api_token_required
+from common.helpers import get_filters, api_token_required, get_canto_status, get_chapter_status, validate_json_request
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
@@ -13,6 +13,33 @@ from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, P
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["POST"])
+@api_exceptions.api_exception_handler
+@validate_json_request
+@method_decorator(csrf_exempt)
+def tagging_status(request):
+    schema = TaggingStatusSchema()
+    response = dict()
+    message = None
+    # validate request data
+    try:
+        data = schema.loads(request.body)
+    except ValidationError as e:
+        raise api_exceptions.BadRequestData(errors=e.messages)
+    canto_num = data["canto_num"]
+    chapter_num = data.get("chapter_num", None)
+    if chapter_num:
+        # return tagging status of a particular canto and chapter
+        resp_data = get_chapter_status(canto_num, chapter_num)
+        message = "Successfully fetched chapter tagging status"
+    else:
+        # return tagging status of a particular canto
+        resp_data = get_canto_status(canto_num)
+        message = "Successfully fetched canto tagging status"
+    return make_response(data=response, message=message, code=200)
+
 
 class TagHandler(View):
     schema = TagSchema

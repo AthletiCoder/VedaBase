@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from verses.api.verse import VerseHandler
-from verses.api.tag import TagTranslationHandler, TagPurportSectionHandler
+from verses.api.tag import TagTranslationHandler, TagPurportSectionHandler, tagging_status
 from accounts.auth import login, logout, register
 
 urlpatterns = [
@@ -29,4 +29,5 @@ urlpatterns = [
     path('login/', login),
     path('logout/', logout),
     path('register/', register),
+    path('tagging-status/', tagging_status)
 ]

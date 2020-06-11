@@ -140,3 +140,17 @@ def set_request_session(f):
         return f(request, *args, **kwargs)
     
     return platform
+
+def update_canto_status(canto_num):
+    pass
+
+def update_chapter_status(canto_num, chapter_num):
+    pass
+
+def get_canto_status(canto_num):
+    pass
+
+def get_chapter_status(canto_num, chapter_num):
+    pass
+
+

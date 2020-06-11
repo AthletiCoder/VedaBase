@@ -5,6 +5,11 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 # STATIC TABLES
+STATUS_CHOICES = (
+    (1, 'Not started'),
+    (2, 'In progress'),
+    (3, 'Done'),
+)
 
 class Verse(models.Model):
     verse_id = models.CharField(max_length=15,null=False, unique=True, primary_key=True)
@@ -17,6 +22,15 @@ class Verse(models.Model):
     devanagari = custom_models.Text(max_length=1000, null=False)
     translation = custom_models.Text(max_length=1000, null=False)
     purport = custom_models.Text(max_length=40000, null=True)
+    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
+    tagging_status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=1)
+    reviewing_status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=1)
+
+class CantoChapterStatus(models.Model):
+    chapter_num = models.PositiveSmallIntegerField(null=False)
+    canto_num = models.PositiveSmallIntegerField(null=False)
+    tagging_status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES,default=1)
+    reviewing_status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, default=1)
 
 class Tag1(models.Model):
     name = models.CharField(max_length=60, unique=True)
