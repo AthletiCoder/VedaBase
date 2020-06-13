@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 # STATIC TABLES
-
 class Verse(models.Model):
     verse_id = models.CharField(max_length=15,null=False, unique=True, primary_key=True)
     canto_num = models.IntegerField(null=False)
@@ -17,6 +16,9 @@ class Verse(models.Model):
     devanagari = custom_models.Text(max_length=1000, null=False)
     translation = custom_models.Text(max_length=1000, null=False)
     purport = custom_models.Text(max_length=40000, null=True)
+
+    context = custom_models.Text(max_length=1000, null=True)
+    title = custom_models.Text(max_length=500, null=True)
 
 class Tag1(models.Model):
     name = models.CharField(max_length=60, unique=True)

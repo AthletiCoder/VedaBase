@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
-from verses.schema import VerseSchema
+from verses.schema import VerseSchema, AdditionalDetailsSchema
 from common import api_exceptions
 from common.helpers import get_filters, api_token_required
 import json
@@ -163,3 +163,31 @@ class VerseHandler(View):
 
         resp_data = make_response({}, message="Successfully updated verse", code=PUT_SUCCESS_CODE)
         return JsonResponse(resp_data)
+
+
+class AdditionalDetails(View):
+    schema = AdditionalDetailsSchema 
+
+    @method_decorator(api_exceptions.api_exception_handler)
+    @method_decorator(api_token_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(AdditionalDetails, self).dispatch(*args, **kwargs)
+
+    def post(self, request):
+        # TODO :- Need to handle validation of verse_id in POST and PUT updates
+        req_data = json.loads(request.body)
+        schema = (self.schema)()
+        try:
+            additional_details = schema.load(req_data)
+        except MarshmallowValidationError as e:
+            raise api_exceptions.BadRequestData(errors=e.messages)
+        verse_id = additional_details.pop("verse_id")
+        try:
+            Verse.objects.filter(verse_id=verse_id).update(**additional_details)
+        except (DjangoValidationError, IntegrityError) as e:
+            raise api_exceptions.ValidationError(errors=e.message_dict)
+
+        resp_data = make_response({}, message="Successfully added verse context and title", code=POST_SUCCESS_CODE)
+        return JsonResponse(resp_data)
+

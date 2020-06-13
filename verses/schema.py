@@ -1,6 +1,5 @@
 from .models import Verse, TranslationTag, PurportSectionTag, Tag1, Tag2, Tag3
-
-from marshmallow import Schema, fields, validates, ValidationError, validates_schema
+from marshmallow import Schema, fields, validates, ValidationError, validates_schema, validate
 
 class VerseSchema(Schema):
     model = Verse
@@ -13,6 +12,9 @@ class VerseSchema(Schema):
     verse = fields.Str(required=True)
     translation = fields.Str(required=True)
     purport = fields.Str(required=True)
+
+    context = fields.Str(dump_only=True)
+    title = fields.Str(dump_only=True)
 
 class TagSchema(Schema):
     model = Tag1
@@ -55,3 +57,14 @@ class PurportSectionTagSchema(BaseTaggingSchema):
         purport_size = len(Verse.objects.get(verse_id=verse_id).purport)
         if start>=end or end>purport_size-1 or start<0:
             raise ValidationError("Invalid start and end indices")
+
+class AdditionalDetailsSchema(Schema):
+    verse_id = fields.Str(required=True)
+    context = fields.Str(required=False, validate=validate.Length(max=1000))
+    title = fields.Str(required=False, validate=validate.Length(max=500))
+
+    @validates("verse_id")
+    def validate_verse_id(self, value):
+        verse_obj = Verse.objects.filter(verse_id=value)
+        if not verse_obj:
+            raise ValidationError("Invalid verse_id")
