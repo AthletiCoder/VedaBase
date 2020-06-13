@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from verses.api.verse import VerseHandler, next_verse, prev_verse
+from verses.api.verse import VerseHandler, next_verse, prev_verse, AdditionalDetails
 from verses.api.tag import TagTranslationHandler, TagPurportSectionHandler
 from accounts.auth import login, logout, register
 
@@ -26,6 +26,7 @@ urlpatterns = [
     path('verse/tagTranslation/<int:id>/', TagTranslationHandler.as_view()),
     path('verse/tagPurportSection', TagPurportSectionHandler.as_view()),
     path('verse/tagPurportSection/<int:id>/', TagPurportSectionHandler.as_view()),
+    path('verse/additional-details', AdditionalDetails.as_view()),
     path('login/', login),
     path('logout/', logout),
     path('register/', register),
