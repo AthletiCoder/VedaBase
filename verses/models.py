@@ -28,7 +28,7 @@ class Tag2(models.Model):
     name = models.CharField(max_length=60, unique=True)
 
 class Tag3(models.Model):
-    name = models.CharField(max_length=70, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     parent_tag = models.ForeignKey(Tag2, on_delete=models.PROTECT)
 
     def __str__(self):
