@@ -20,6 +20,14 @@ class Verse(models.Model):
     context = custom_models.Text(max_length=1000, null=True)
     title = custom_models.Text(max_length=500, null=True)
 
+class Tag(models.Model):
+    name = models.CharField(max_length=100, null=False)
+    level = models.PositiveSmallIntegerField(default=1, null=False)
+    parent = models.ForeignKey('self', default=None, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        unique_together = ('level', 'name')
+
 class Tag1(models.Model):
     name = models.CharField(max_length=60, unique=True)
 
@@ -40,6 +48,7 @@ class TranslationTag(models.Model):
     tagger = models.ForeignKey(User, related_name="translation_tagger", on_delete=models.SET_NULL, null=True)
     tagger_remark = models.CharField(max_length=1000, null=True)
     reviewer = models.ForeignKey(User, related_name="translation_reviewer", on_delete=models.SET_NULL, null=True)
+    tag_name = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         unique_together = ('verse_id', 'tag')
@@ -52,6 +61,7 @@ class PurportSectionTag(models.Model):
     tagger = models.ForeignKey(User, related_name="purport_tagger", on_delete=models.SET_NULL, null=True)
     tagger_remark = models.CharField(max_length=1000, null=True)
     reviewer = models.ForeignKey(User, related_name="purport_reviewer", on_delete=models.SET_NULL, null=True)
+    tag_name = models.ForeignKey(Tag, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         unique_together = ('verse_id', 'tag', 'start_idx', 'end_idx')
