@@ -7,32 +7,23 @@ admin.site.register([Verse, TranslationTag, PurportSectionTag])
 # Register your models here.
 
 class Tag1A(admin.ModelAdmin):
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     search_fields = ('name',)
-    ordering = ('name',)
+    ordering = ('id', 'name',)
     filter_horizontal = ()
 
 class Tag2A(admin.ModelAdmin):
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('name', 'parent_tag_id')
+    list_display = ('id', 'name', 'parent_tag_id')
     list_filter = ('parent_tag_id',)
     search_fields = ('name','parent_tag_id')
-    ordering = ('parent_tag_id', 'name')
+    ordering = ('id', 'parent_tag_id', 'name')
     filter_horizontal = ()
      
 class Tag3A(admin.ModelAdmin):
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('name', 'parent_tag_id')
+    list_display = ('id', 'name', 'parent_tag_id')
     list_filter = ('parent_tag_id',)
     search_fields = ('name','parent_tag_id')
-    ordering = ('parent_tag_id', 'name')
+    ordering = ('id', 'parent_tag_id', 'name')
     filter_horizontal = ()
 
 # Now register the new UserAdmin...
