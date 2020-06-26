@@ -1,33 +1,18 @@
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
-from verses.schema import TagSchema, TranslationTagSchema, PurportSectionTagSchema
+from verses.schema import TranslationTagSchema, PurportSectionTagSchema
 from common import api_exceptions
 from common.helpers import get_filters, api_token_required
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3, Tag
+from verses.models import Verse, TranslationTag, PurportSectionTag, Tag
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE, DELETE_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
-
-class TagHandler(View):
-    schema = TagSchema
-
-    @method_decorator(api_exceptions.api_exception_handler)
-    @method_decorator(api_token_required)
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super(VerseHandler, self).dispatch(*args, **kwargs)
-
-    def get(self, request):
-        tags = self.schema.model.objects.all()
-        schema = (self.schema)()
-        data = schema.dump(tags)
-        return JsonResponse(data)
 
 class TagTranslationHandler(View):
     schema = TranslationTagSchema
@@ -63,10 +48,9 @@ class TagTranslationHandler(View):
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
             new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
-            new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
             new_translation_tag["tag_name"] = Tag.objects.get(name=new_translation_tag["tag"])
             new_translation_tag["tagger"] = request.user
-            print(new_translation_tag)
+            new_translation_tag.pop("tag")
             try:
                 translation_tags = self.schema.model.objects.create(**new_translation_tag)
             except DjangoValidationError as e:
@@ -134,9 +118,9 @@ class TagPurportSectionHandler(View):
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
             try:
-                new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
                 new_purport_section_tag["tag_name"] = Tag.objects.get(name=new_purport_section_tag["tag"])
                 new_purport_section_tag["tagger"] = request.user
+                new_purport_section_tag.pop("tag")
                 purport_section_tags = self.schema.model.objects.create(**new_purport_section_tag)
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
