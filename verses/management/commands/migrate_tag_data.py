@@ -36,4 +36,5 @@ class Command(BaseCommand):
                     kwargs["name"] = tag3.name
                     kwargs["level"] = 3
                     kwargs["parent"] = tag2_obj
+                    kwargs["is_lead"] = True
                     tag3_obj = Tag.objects.get_or_create(**kwargs)
