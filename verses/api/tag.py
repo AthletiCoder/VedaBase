@@ -8,7 +8,7 @@ import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3
+from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3, Tag
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE, DELETE_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
@@ -60,19 +60,20 @@ class TagTranslationHandler(View):
             try:
                 req['verse_id'] = verse_id
                 new_translation_tag = schema.load(req)
-                print(new_translation_tag)
             except MarshmallowValidationError as e:
                 raise api_exceptions.BadRequestData(errors=e.messages)
             new_translation_tag["verse"] = Verse.objects.get(verse_id=new_translation_tag["verse_id"])
             new_translation_tag["tag"] = Tag3.objects.get(name=new_translation_tag["tag"])
+            new_translation_tag["tag_name"] = Tag.objects.get(name=new_translation_tag["tag"])
             new_translation_tag["tagger"] = request.user
+            print(new_translation_tag)
             try:
                 translation_tags = self.schema.model.objects.create(**new_translation_tag)
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
                 if new_translation_tag.get("tagger_remark"):
-                    t_tag = self.schema.model.objects.filter(verse_id=new_translation_tag["verse_id"], tag=new_translation_tag["tag"])
+                    t_tag = self.schema.model.objects.filter(verse_id=new_translation_tag["verse_id"], tag_name=new_translation_tag["tag_name"])
                     t_tag.update(tagger_remark=new_translation_tag["tagger_remark"])
                     t_tag[0].save()
                     resp_data.append(schema.dump(t_tag[0]))
@@ -134,13 +135,14 @@ class TagPurportSectionHandler(View):
                 raise api_exceptions.BadRequestData(errors=e.messages)
             try:
                 new_purport_section_tag["tag"] = Tag3.objects.get(name=new_purport_section_tag["tag"])
+                new_purport_section_tag["tag_name"] = Tag.objects.get(name=new_purport_section_tag["tag"])
                 new_purport_section_tag["tagger"] = request.user
                 purport_section_tags = self.schema.model.objects.create(**new_purport_section_tag)
             except DjangoValidationError as e:
                 raise api_exceptions.ValidationError(errors=e.message_dict)
             except IntegrityError as e:
                 if new_purport_section_tag.get("tagger_remark"):
-                    p_tag = self.schema.model.objects.filter(verse_id=new_purport_section_tag["verse_id"], start_idx=new_purport_section_tag["start_idx"], end_idx=new_purport_section_tag["end_idx"], tag=new_purport_section_tag["tag"])
+                    p_tag = self.schema.model.objects.filter(verse_id=new_purport_section_tag["verse_id"], start_idx=new_purport_section_tag["start_idx"], end_idx=new_purport_section_tag["end_idx"], tag=new_purport_section_tag["tag_name"])
                     p_tag.update(tagger_remark=new_purport_section_tag["tagger_remark"])
                     p_tag[0].save()
                     resp_data.append(schema.dump(p_tag[0]))

@@ -66,7 +66,7 @@ def prev_verse(request):
     canto, chapter, verse = verse_id.split(".")
     prev = None
     if "-" in verse:
-        prev = int(verse.split('-')[1])-1
+        prev = int(verse.split('-')[0])-1
     else:
         prev = int(verse)-1
     verse_id = ".".join([canto, chapter, str(prev)])

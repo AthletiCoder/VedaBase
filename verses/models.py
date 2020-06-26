@@ -24,6 +24,7 @@ class Tag(models.Model):
     name = models.CharField(max_length=100, null=False)
     level = models.PositiveSmallIntegerField(default=1, null=False)
     parent = models.ForeignKey('self', default=None, on_delete=models.CASCADE, null=True)
+    is_leaf = models.BooleanField(default=False, null=False)
 
     class Meta:
         unique_together = ('level', 'name')

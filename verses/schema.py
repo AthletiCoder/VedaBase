@@ -1,4 +1,4 @@
-from .models import Verse, TranslationTag, PurportSectionTag, Tag1, Tag2, Tag3
+from .models import Verse, TranslationTag, PurportSectionTag, Tag1, Tag2, Tag3, Tag
 from marshmallow import Schema, fields, validates, ValidationError, validates_schema, validate
 
 class VerseSchema(Schema):
@@ -40,6 +40,8 @@ class BaseTaggingSchema(Schema):
         tag_obj = Tag.objects.filter(name=value)
         if not tag_obj:
             raise ValidationError("Invalid tag")
+        if not tag_obj[0].is_leaf:
+            raise ValidationError("Not a leaf tag")
 
 class TranslationTagSchema(BaseTaggingSchema):
     model = TranslationTag

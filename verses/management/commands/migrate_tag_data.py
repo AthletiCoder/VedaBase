@@ -14,19 +14,26 @@ class Command(BaseCommand):
         all_tag1 = Tag1.objects.all()
 
         for tag1 in all_tag1:
+            print(tag1.name)
             kwargs = dict()
             kwargs["name"] = tag1.name
             kwargs["level"] = 1
-            tag1_obj = Tag.objects.create(**kwargs)
+            tag1_obj = Tag.objects.get_or_create(**kwargs)
+            if type(tag1_obj)==tuple:
+                tag1_obj = tag1_obj[0]
             for tag2 in all_tag2.filter(parent_tag__name=tag1_obj.name):
+                print("\t"+tag2.name)
                 kwargs = dict()
                 kwargs["name"] = tag2.name
                 kwargs["level"] = 2
                 kwargs["parent"] = tag1_obj
-                tag2_obj = Tag.objects.create(**kwargs)
+                tag2_obj = Tag.objects.get_or_create(**kwargs)
+                if type(tag2_obj)==tuple:
+                    tag2_obj = tag2_obj[0]
                 for tag3 in all_tag3.filter(parent_tag__name=tag2_obj.name):
+                    print("\t\t"+tag3.name)
                     kwargs = dict()
                     kwargs["name"] = tag3.name
                     kwargs["level"] = 3
                     kwargs["parent"] = tag2_obj
-                    tag3_obj = Tag.objects.create(**kwargs)
+                    tag3_obj = Tag.objects.get_or_create(**kwargs)
