@@ -1,4 +1,4 @@
-from .models import Verse, TranslationTag, PurportSectionTag, Tag1, Tag2, Tag3, Tag
+from .models import Verse, TranslationTag, PurportSectionTag, Tag
 from marshmallow import Schema, fields, validates, ValidationError, validates_schema, validate
 
 class VerseSchema(Schema):
@@ -16,10 +16,6 @@ class VerseSchema(Schema):
     context = fields.Str(dump_only=True)
     title = fields.Str(dump_only=True)
 
-class TagSchema(Schema):
-    model = Tag1
-    tag1 = fields.Str(required=False)
-    
 class BaseTaggingSchema(Schema):
     tag_id = fields.Function(lambda obj: obj.id)
     verse_id = fields.Str(required=True)

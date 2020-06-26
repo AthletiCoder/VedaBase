@@ -8,7 +8,7 @@ import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3
+from verses.models import Verse, TranslationTag, PurportSectionTag
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError

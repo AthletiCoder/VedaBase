@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import Verse, TranslationTag, PurportSectionTag, Tag1, Tag2, Tag3
+from .models import Verse, TranslationTag, PurportSectionTag, Tag
 from django.contrib.auth.models import Group
 admin.site.register([Verse, TranslationTag, PurportSectionTag])
-
 
 # Register your models here.
 
