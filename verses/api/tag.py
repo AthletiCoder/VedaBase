@@ -13,6 +13,7 @@ from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, P
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
+from django.views.decorators.http import require_http_methods
 
 class TagTranslationHandler(View):
     schema = TranslationTagSchema
@@ -152,3 +153,19 @@ class TagPurportSectionHandler(View):
         tag[0].reviewer = request.user
         tag[0].save()
         return JsonResponse(make_response({}, "Successfully reviewed purport tag", PUT_SUCCESS_CODE))
+
+def get_sub_tags(tag):
+    if tag.is_leaf:
+        return {}
+    else:
+        return {child.name:get_sub_tags(child) for child in Tag.objects.filter(parent__id=tag.id)}
+
+@require_http_methods(["GET"])
+@api_exceptions.api_exception_handler
+@api_token_required
+@method_decorator(csrf_exempt)
+def get_tags(request):
+    top_tags = Tag.objects.filter(level=1)
+    all_tags = [{l1_tag.name:get_sub_tags(l1_tag) for l1_tag in top_tags}]
+    return JsonResponse(make_response(all_tags, "Successfully fetched all tags", GET_SUCCESS_CODE))
+
