@@ -13,6 +13,7 @@ from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, P
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
+from django.views.decorators.http import require_http_methods
 
 def get_verse(filter_params):
     verses = Verse.objects.filter(**filter_params)
@@ -23,6 +24,7 @@ def get_verse(filter_params):
         verses = Verse.objects.raw(query)
     return verses
 
+@require_http_methods(["GET"])
 @api_exceptions.api_exception_handler
 @api_token_required
 @method_decorator(csrf_exempt)
