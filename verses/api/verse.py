@@ -8,11 +8,12 @@ import json
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from verses.models import Verse, TranslationTag, PurportSectionTag, Tag3
+from verses.models import Verse, TranslationTag, PurportSectionTag
 from common.helpers import make_response, GET_SUCCESS_CODE, POST_SUCCESS_CODE, PUT_SUCCESS_CODE
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.utils import IntegrityError
 from marshmallow import ValidationError as MarshmallowValidationError
+from django.views.decorators.http import require_http_methods
 
 def get_verse(filter_params):
     verses = Verse.objects.filter(**filter_params)
@@ -23,6 +24,7 @@ def get_verse(filter_params):
         verses = Verse.objects.raw(query)
     return verses
 
+@require_http_methods(["GET"])
 @api_exceptions.api_exception_handler
 @api_token_required
 @method_decorator(csrf_exempt)
@@ -66,7 +68,7 @@ def prev_verse(request):
     canto, chapter, verse = verse_id.split(".")
     prev = None
     if "-" in verse:
-        prev = int(verse.split('-')[1])-1
+        prev = int(verse.split('-')[0])-1
     else:
         prev = int(verse)-1
     verse_id = ".".join([canto, chapter, str(prev)])
