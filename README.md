@@ -2,6 +2,8 @@
 
 Search through vedabase themewise!
 
+Checkout the DB Schema diagram [here](https://dbdiagram.io/d/5eb8c1be39d18f5553fefd6c)
+
 ## Instructions
 * `pip install -r requirements.txt` to install all the project dependencies
 * add `local_settings.py` to your local `.gitignore` and ensure it's not pushed to the repo
