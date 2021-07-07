@@ -102,7 +102,6 @@ def api_token_required(f):
             user_model = get_user_model()
             user = user_model.objects.filter(id=payload["user_id"])
             if not user:
-                request.log.error("User doesn't exist in system")
                 return JsonResponse(
                     {"error": USER_NOT_EXIST_IN_ACCOUNT, "message": AUTH_ERROR, "status_code": 453}, status=401
                 )
