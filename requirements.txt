@@ -11,7 +11,7 @@ idna==2.9
 marshmallow==3.6.0
 mysqlclient==1.4.6
 pycparser==2.20
-PyJWT==1.7.1
+PyJWT==2.4.0
 PyMySQL==0.9.3
 pytz==2019.2
 requests==2.23.0
